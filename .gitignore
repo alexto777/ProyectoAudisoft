@@ -1,5 +1,6 @@
 # Visual Studio
 .vs/
+ProyectoAudisoft.Api/.vs/
 bin/
 obj/
 *.user
