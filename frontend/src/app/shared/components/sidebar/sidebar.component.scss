@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+mat-nav-list {
+  padding-top: 16px;
+}
+
+a.mat-mdc-list-item {
+  color: #e5e7eb; // gris claro
+  border-radius: 8px;
+  margin: 4px 8px;
+}
+
+a.mat-mdc-list-item mat-icon {
+  color: #c7d2fe; // azul claro
+}
+
+a.mat-mdc-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+a.mat-mdc-list-item.active {
+  background-color: rgba(99, 102, 241, 0.2);
+  color: #ffffff;
+}
+
+a.mat-mdc-list-item.active mat-icon {
+  color: #ffffff;
+}
