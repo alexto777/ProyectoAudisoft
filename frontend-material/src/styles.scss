@@ -39,3 +39,13 @@ $frontend-material-theme: mat.define-light-theme((
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.custom-dialog .mat-mdc-dialog-container {
+  padding: 0;
+}
+
+.custom-dialog .mat-mdc-dialog-surface {
+  padding: 24px;
+  border-radius: 12px;
+  max-height: 90vh;
+}

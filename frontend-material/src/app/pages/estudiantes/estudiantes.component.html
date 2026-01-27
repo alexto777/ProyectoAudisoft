@@ -1,23 +1,51 @@
-<h1 class="page-title">Dashboard</h1>
+<h1 class="page-title">Estudiantes</h1>
+<p class="page-subtitle">
+  Administración de estudiantes registrados en el sistema
+</p>
 
-<div class="kpi-grid">
-  <mat-card class="kpi-card">
-    <p class="kpi-title">Estudiantes</p>
-    <h2 class="kpi-value">120</h2>
-  </mat-card>
-
-  <mat-card class="kpi-card">
-    <p class="kpi-title">Profesores</p>
-    <h2 class="kpi-value">12</h2>
-  </mat-card>
-
-  <mat-card class="kpi-card">
-    <p class="kpi-title">Notas registradas</p>
-    <h2 class="kpi-value">540</h2>
-  </mat-card>
-
-  <mat-card class="kpi-card">
-    <p class="kpi-title">Promedio general</p>
-    <h2 class="kpi-value">3.9</h2>
-  </mat-card>
+<!-- Barra superior -->
+<div class="page-actions">
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="crear()">
+    <mat-icon>person_add</mat-icon>
+    Nuevo estudiante
+  </button>
 </div>
+
+<mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+
+  <ng-container matColumnDef="nombre">
+    <mat-header-cell *matHeaderCellDef> Estudiante </mat-header-cell>
+    <mat-cell *matCellDef="let e"> {{ e.nombre }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="notas">
+    <mat-header-cell *matHeaderCellDef> Notas </mat-header-cell>
+    <mat-cell *matCellDef="let e"> {{ e.cantidadNotas }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="acciones">
+    <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
+    <mat-cell *matCellDef="let e">
+      <button
+        mat-icon-button
+        color="warn"
+        [disabled]="e.cantidadNotas > 0"
+        (click)="eliminar(e)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+
+</mat-table>
+
+<mat-paginator
+  [pageSize]="5"
+  [pageSizeOptions]="[5]"
+  showFirstLastButtons>
+</mat-paginator>
