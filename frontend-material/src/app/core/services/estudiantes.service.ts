@@ -28,4 +28,11 @@ export class EstudiantesService {
     );
   }
 
+  update(id: number, data: { nombre: string }) {
+  return this.http.put(
+    `${this.apiUrl}/${id}`,
+    data
+  );
+}
+
 }

@@ -18,85 +18,67 @@ namespace ProyectoAudisoft.Api.Controllers
         }
 
         // GET: api/Profesores
-        [HttpGet("profesor/{profesorId}")]
-        public async Task<IActionResult> GetByProfesor(int profesorId)
+        [HttpGet]
+        public async Task<IActionResult> Get()
         {
-            var notas = await _context.Notas
-                .Where(n => n.ProfesorId == profesorId)
-                .Include(n => n.Estudiante)
-                .Select(n => new NotaDto
-                {
-                    Id = n.Id,
-                    Valor = n.Valor,
-
-                    EstudianteId = n.EstudianteId,
-                    Estudiante = n.Estudiante.Nombre,
-
-                    ProfesorId = n.ProfesorId,
-                    Profesor = n.Profesor.Nombre,
-
-                    Materia = n.Materia
-                })
-                .ToListAsync();
-
-            return Ok(notas);
+            var profesores = await _context.Profesores.ToListAsync();
+            return Ok(profesores);
         }
-
 
         // GET: api/Profesores/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Profesor>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             var profesor = await _context.Profesores.FindAsync(id);
-
-            if (profesor == null)
-                return NotFound();
-
-            return profesor;
+            if (profesor == null) return NotFound();
+            return Ok(profesor);
         }
 
         // POST: api/Profesores
         [HttpPost]
-        public async Task<ActionResult<Profesor>> Post(Profesor profesor)
+        public async Task<IActionResult> Post([FromBody] ProfesorCreateDto dto)
         {
+            var profesor = new Profesor
+            {
+                Nombre = dto.Nombre,
+                Especialidad = dto.Especialidad
+            };
+
+
             _context.Profesores.Add(profesor);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById),
-                new { id = profesor.Id }, profesor);
+            return Ok(profesor);
         }
 
         // PUT: api/Profesores/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Profesor profesor)
+        public async Task<IActionResult> Put(int id, [FromBody] ProfesorUpdateDto dto)
         {
-            if (id != profesor.Id)
-                return BadRequest();
+            var profesor = await _context.Profesores.FindAsync(id);
+            if (profesor == null) return NotFound();
 
-            _context.Entry(profesor).State = EntityState.Modified;
+            profesor.Nombre = dto.Nombre;
+
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 
+        // DELETE: api/Profesores/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProfesor(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var tieneNotas = await _context.Notas.AnyAsync(n => n.ProfesorId == id);
-
-            if (tieneNotas)
-            {
-                return BadRequest("El docente tiene estudiantes con notas asignadas");
-            }
-
             var profesor = await _context.Profesores.FindAsync(id);
             if (profesor == null) return NotFound();
+
+            var tieneNotas = await _context.Notas.AnyAsync(n => n.ProfesorId == id);
+            if (tieneNotas)
+                return BadRequest("El profesor tiene notas asociadas");
 
             _context.Profesores.Remove(profesor);
             await _context.SaveChangesAsync();
 
-            return Ok("Profesor eliminado correctamente");
+            return NoContent();
         }
-
     }
 }

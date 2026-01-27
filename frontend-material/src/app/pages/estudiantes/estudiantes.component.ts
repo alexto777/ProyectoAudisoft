@@ -5,7 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { EstudiantesService } from '../../core/services/estudiantes.service';
 import { Estudiante } from '../../core/models/estudiante.model';
@@ -19,11 +20,13 @@ import { CreateEstudianteDialogComponent } from './create-estudiante-dialog/crea
   selector: 'app-estudiantes',
   standalone: true,
   imports: [
+    CommonModule, 
     MatTableModule,
     MatIconModule,
     MatButtonModule,
     MatSnackBarModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    FormsModule
   ],
   templateUrl: './estudiantes.component.html',
   styleUrls: ['./estudiantes.component.scss']
@@ -109,6 +112,35 @@ export class EstudiantesComponent implements OnInit {
     });
   }
 
+  activarEdicion(estudiante: Estudiante) {
+  estudiante.editando = true;
+  estudiante.nombreEditado = estudiante.nombre;
+}
 
+cancelarEdicion(estudiante: Estudiante) {
+  estudiante.editando = false;
+  estudiante.nombreEditado = estudiante.nombre;
+}
+
+guardarEdicion(estudiante: Estudiante) {
+  if (!estudiante.nombreEditado?.trim()) return;
+
+  this.service.update(estudiante.id, {
+    nombre: estudiante.nombreEditado
+  }).subscribe({
+    next: () => {
+      estudiante.nombre = estudiante.nombreEditado!;
+      estudiante.editando = false;
+      this.snackBar.open('Estudiante actualizado', 'OK', {
+        duration: 2000
+      });
+    },
+    error: () => {
+      this.snackBar.open('Error actualizando estudiante', 'Cerrar', {
+        duration: 3000
+      });
+    }
+  });
+}
 
 }
