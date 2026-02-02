@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ProfesoresService } from '../../core/services/profesores.service';
 import { CreateProfesorDialogComponent } from './create-profesor-dialog/create-profesor-dialog.component';
@@ -14,17 +14,19 @@ import { Profesor } from '../../core/models/profesor.model';
   selector: 'app-profesores',
   standalone: true,
   imports: [
-    CommonModule,        // 🔴 SIN ESTO ngIf NO FUNCIONA
+    CommonModule,
     MatTableModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   templateUrl: './profesores.component.html',
   styleUrls: ['./profesores.component.scss']
 })
 export class ProfesoresComponent implements OnInit {
 
-  displayedColumns = ['nombre', 'acciones'];
+  displayedColumns = ['nombre','acciones'];
   dataSource: Profesor[] = [];
 
   constructor(
@@ -55,6 +57,10 @@ export class ProfesoresComponent implements OnInit {
         next: () => {
           this.snackBar.open('Profesor creado', 'OK', { duration: 2000 });
           this.load();
+        },
+        error: err => {
+          console.error('ERROR CREATE 👉', err);
+          this.snackBar.open('Error creando profesor', 'Cerrar', { duration: 3000 });
         }
       });
     });
@@ -62,18 +68,27 @@ export class ProfesoresComponent implements OnInit {
 
   editar(profesor: Profesor) {
     const dialogRef = this.dialog.open(CreateProfesorDialogComponent, {
-      data: profesor
+      data: {
+        id: profesor.id,
+        nombre: profesor.nombre,
+        materiaId: (profesor as any).materiaId ?? null
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (!result) return;
 
-      this.service.update(profesor.id, result).subscribe({
+      this.service.update(result.id, result).subscribe({
         next: () => {
           this.snackBar.open('Profesor actualizado', 'OK', { duration: 2000 });
           this.load();
+        },
+        error: err => {
+          console.error('ERROR PUT 👉', err);
+          this.snackBar.open('Error actualizando profesor', 'Cerrar', { duration: 3000 });
         }
       });
+
     });
   }
 
@@ -86,10 +101,12 @@ export class ProfesoresComponent implements OnInit {
       error: err => {
         if (err.status === 400) {
           this.snackBar.open(
-            'El profesor tiene notas asociadas',
+            'El profesor tiene estudiantes asignados con notas',
             'Cerrar',
             { duration: 4000 }
           );
+        } else {
+          this.snackBar.open('Error eliminando profesor', 'Cerrar', { duration: 3000 });
         }
       }
     });

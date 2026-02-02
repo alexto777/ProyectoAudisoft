@@ -31,14 +31,15 @@ namespace ProyectoAudisoft.Api.Controllers
                     Materia = n.Materia,
 
                     EstudianteId = n.EstudianteId,
-                    Estudiante = n.Estudiante.Nombre,
+                    Estudiante = n.Estudiante != null ? n.Estudiante.Nombre : "",
 
                     ProfesorId = n.ProfesorId,
-                    Profesor = n.Profesor.Nombre
+                    Profesor = n.Profesor != null ? n.Profesor.Nombre : ""
                 })
                 .ToListAsync();
 
             return Ok(notas);
+
         }
 
         // GET: api/Notas/estudiante/1
@@ -48,18 +49,15 @@ namespace ProyectoAudisoft.Api.Controllers
             var notas = await _context.Notas
                 .Where(n => n.EstudianteId == estudianteId)
                 .Include(n => n.Profesor)
-                .Include(n => n.Estudiante)
                 .Select(n => new NotaDto
                 {
                     Id = n.Id,
                     Valor = n.Valor,
                     Materia = n.Materia,
-
                     EstudianteId = n.EstudianteId,
-                    Estudiante = n.Estudiante.Nombre,
-
+                    Estudiante = n.Estudiante != null ? n.Estudiante.Nombre : "",
                     ProfesorId = n.ProfesorId,
-                    Profesor = n.Profesor.Nombre
+                    Profesor = n.Profesor != null ? n.Profesor.Nombre : ""
                 })
                 .ToListAsync();
 
@@ -73,18 +71,15 @@ namespace ProyectoAudisoft.Api.Controllers
             var notas = await _context.Notas
                 .Where(n => n.ProfesorId == profesorId)
                 .Include(n => n.Estudiante)
-                .Include(n => n.Profesor)
                 .Select(n => new NotaDto
                 {
                     Id = n.Id,
                     Valor = n.Valor,
                     Materia = n.Materia,
-
                     EstudianteId = n.EstudianteId,
-                    Estudiante = n.Estudiante.Nombre,
-
+                    Estudiante = n.Estudiante != null ? n.Estudiante.Nombre : "",
                     ProfesorId = n.ProfesorId,
-                    Profesor = n.Profesor.Nombre
+                    Profesor = n.Profesor != null ? n.Profesor.Nombre : ""
                 })
                 .ToListAsync();
 
@@ -93,59 +88,40 @@ namespace ProyectoAudisoft.Api.Controllers
 
         // POST: api/Notas
         [HttpPost]
-        public async Task<IActionResult> Post(Nota nota)
+        public async Task<IActionResult> Post([FromBody] NotaCreateDto dto)
         {
-            if (nota == null)
-                return BadRequest("La nota es obligatoria");
-
-            if (nota.Valor < 0 || nota.Valor > 5)
+            if (dto.Valor < 0 || dto.Valor > 5)
                 return BadRequest("La nota debe estar entre 0 y 5");
+
+            var nota = new Nota
+            {
+                Valor = dto.Valor,
+                Materia = dto.Materia,
+                EstudianteId = dto.EstudianteId,
+                ProfesorId = dto.ProfesorId
+            };
 
             _context.Notas.Add(nota);
             await _context.SaveChangesAsync();
 
-            var dto = await _context.Notas
-                .Include(n => n.Estudiante)
-                .Include(n => n.Profesor)
-                .Where(n => n.Id == nota.Id)
-                .Select(n => new NotaDto
-                {
-                    Id = n.Id,
-                    Valor = n.Valor,
-                    Materia = n.Materia,
-
-                    EstudianteId = n.EstudianteId,
-                    Estudiante = n.Estudiante.Nombre,
-
-                    ProfesorId = n.ProfesorId,
-                    Profesor = n.Profesor.Nombre
-                })
-                .FirstAsync();
-
-            return Ok(dto);
+            return Ok(nota);
         }
 
         // PUT: api/Notas/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Nota nota)
+        public async Task<IActionResult> Put(int id, [FromBody] NotaUpdateDto dto)
         {
-            if (id != nota.Id)
-                return BadRequest("Id incorrecto");
-
-            if (nota.Valor < 0 || nota.Valor > 5)
+            if (dto.Valor < 0 || dto.Valor > 5)
                 return BadRequest("La nota debe estar entre 0 y 5");
 
-            var existente = await _context.Notas.FindAsync(id);
-            if (existente == null)
+            var nota = await _context.Notas.FindAsync(id);
+            if (nota == null)
                 return NotFound();
 
-            existente.Valor = nota.Valor;
-            existente.Materia = nota.Materia;
-            existente.ProfesorId = nota.ProfesorId;
-            existente.EstudianteId = nota.EstudianteId;
+            nota.Valor = dto.Valor;
+            nota.Materia = dto.Materia;
 
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 
